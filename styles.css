@@ -4,6 +4,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+ 
     margin: 0;
     background: linear-gradient(45deg, #01507e, #04ffea); /* Radiant background */
 }
@@ -32,11 +33,10 @@ body {
     grid-template-columns: repeat(4, 1fr);
     grid-gap: 10px;
 }
-
 button {
     width: 100%;
-    padding: 20px;
-    font-size: 18px;
+    padding: 15px; /* Reduced padding */
+    font-size: 16px; /* Smaller font size */
     font-weight: bold;
     color: rgb(0, 2, 1);
     border: none;
@@ -45,6 +45,8 @@ button {
     background: linear-gradient(145deg, #01374d83, #00f7ffe8), black; /* Radiant gradient for buttons */
     transition: transform 0.2s, background-color 0.3s;
 }
+
+
 
 button:hover {
     transform: scale(1.05);
@@ -56,4 +58,61 @@ button:active {
 
 .zero {
     grid-column: span 2;
+}
+.history {
+    display: none; /* Initially hidden */
+    position: fixed; /* Fixed position to place it in the upper left corner */
+    top: 10px; /* Distance from the top of the screen */
+    left: 10px; /* Distance from the left side of the screen */
+    padding: 1px;
+    background: #f4f4f4;
+    border-radius: 10px;
+    max-width: 300px;
+    max-height: 300px; /* Limit the height to make it scrollable */
+    overflow-y: auto; /* Make history scrollable */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Ensures it stays on top of other elements */
+    border: 1px solid black;
+   
+}
+
+.history h4 {
+    margin: 0;
+    text-align: center;
+}
+
+#history-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#history-list li {
+    padding: 5px;
+    border-bottom: 1px solid #000000;
+    border: 3px solid #09615a;
+    margin-top: 1px;
+    display: flex;
+    flex-direction: column;
+}
+
+#history-list li:last-child {
+    border-bottom: none;
+}
+
+#toggle-history {
+    margin-top: 10px;
+    padding: 1px ;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    
+    border-radius: 5px;
+    background: #4CAF50; /* Green background */
+    color: white;
+    transition: background-color 0.3s;
+}
+
+#toggle-history:hover {
+    background-color: #45a049;
+    
 }

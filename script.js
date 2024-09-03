@@ -1,4 +1,8 @@
 const display = document.getElementById('display');
+const historyList = document.getElementById('history-list');
+const historySection = document.getElementById('history-section');
+const toggleHistoryButton = document.getElementById('toggle-history');
+let history = [];
 
 // Function to append text to the display
 function appendToDisplay(value) {
@@ -11,7 +15,6 @@ function appendNumber(number) {
 }
 
 function appendOperator(operator) {
-    // Ensure operator isn't appended if last character is already an operator
     const lastChar = display.value.slice(-1);
     if (/[+\-*/]/.test(lastChar)) return;
     appendToDisplay(operator);
@@ -27,36 +30,90 @@ function deleteLast() {
 
 function calculate() {
     try {
-        display.value = eval(display.value);
+        const result = eval(display.value);
+        addToHistory(display.value, result);
+        display.value = result;
     } catch (error) {
         display.value = 'Error';
     }
 }
 
+// Function to add calculation to history with timestamp
+function addToHistory(expression, result) {
+    const timestamp = new Date().toLocaleString(); // Get current date and time
+    const historyItem = `${expression} = ${result}`;
+    history.push({ expression: historyItem, timestamp: timestamp });
+
+    // Update history display
+    updateHistory();
+}
+
+function updateHistory() {
+    historyList.innerHTML = ''; // Clear previous history
+
+    if (history.length === 0) {
+        const emptyMessage = document.createElement('li');
+        emptyMessage.textContent = 'No history available';
+        emptyMessage.style.textAlign = 'center'; // Center the text
+        historyList.appendChild(emptyMessage);
+    } else {
+        history.forEach(item => {
+            const listItem = document.createElement('li');
+            
+            // Expression
+            const expressionElement = document.createElement('div');
+            expressionElement.textContent = item.expression;
+
+            // Timestamp
+            const timestampElement = document.createElement('div');
+            timestampElement.textContent = item.timestamp;
+            timestampElement.style.color = '#FF5733'; // Highlight color for the timestamp
+            timestampElement.style.fontSize = '0.85em';
+            timestampElement.style.marginTop = '5px';
+
+            listItem.appendChild(expressionElement);
+            listItem.appendChild(timestampElement);
+            historyList.appendChild(listItem);
+        });
+    }
+}
+
 function calculateSin() {
-    display.value = Math.sin(toRadians(parseFloat(display.value)));
+    const result = Math.sin(toRadians(parseFloat(display.value)));
+    addToHistory(`sin(${display.value})`, result);
+    display.value = result;
 }
 
 function calculateCos() {
-    display.value = Math.cos(toRadians(parseFloat(display.value)));
+    const result = Math.cos(toRadians(parseFloat(display.value)));
+    addToHistory(`cos(${display.value})`, result);
+    display.value = result;
 }
 
 function calculateTan() {
-    display.value = Math.tan(toRadians(parseFloat(display.value)));
+    const result = Math.tan(toRadians(parseFloat(display.value)));
+    addToHistory(`tan(${display.value})`, result);
+    display.value = result;
 }
 
 function calculateLog() {
-    display.value = Math.log10(parseFloat(display.value));
+    const result = Math.log10(parseFloat(display.value));
+    addToHistory(`log(${display.value})`, result);
+    display.value = result;
 }
 
 function calculateSqrt() {
-    display.value = Math.sqrt(parseFloat(display.value));
+    const result = Math.sqrt(parseFloat(display.value));
+    addToHistory(`√(${display.value})`, result);
+    display.value = result;
 }
 
 function calculatePow() {
     let base = prompt("Enter base:");
     let exponent = prompt("Enter exponent:");
-    display.value = Math.pow(parseFloat(base), parseFloat(exponent));
+    const result = Math.pow(parseFloat(base), parseFloat(exponent));
+    addToHistory(`${base}^${exponent}`, result);
+    display.value = result;
 }
 
 function toRadians(degrees) {
@@ -65,37 +122,63 @@ function toRadians(degrees) {
 
 // Function to handle keyboard input
 function handleKeyboardInput(event) {
-    const key = event.key;
+    const key = event.key.toLowerCase();
 
-    // Number keys and operators
     if (/[0-9]/.test(key)) {
         appendNumber(key);
     } else if (key === '+' || key === '-' || key === '*' || key === '/') {
         appendOperator(key);
-    } else if (key === 'Enter') {
-        event.preventDefault(); // Prevent form submission
+    } else if (key === 'enter') {
+        event.preventDefault();
         calculate();
     } else if (key === '=') {
-        event.preventDefault(); // Prevent form submission
+        event.preventDefault();
         calculate();
-    } else if (key === 'Backspace') {
+    } else if (key === 'backspace') {
         deleteLast();
-    } else if (key === 'Escape') {
+    } else if (key === 'escape') {
         clearDisplay();
+    } else if (key === 'h') {
+        toggleHistory();
     }
 }
 
-// Add event listener for keyboard input
 document.addEventListener('keydown', handleKeyboardInput);
+
+// Function to toggle history section visibility
+function toggleHistory() {
+    if (historySection.style.display === 'none' || historySection.style.display === '') {
+        historySection.style.display = 'block';
+        toggleHistoryButton.textContent = 'Hide';
+    } else {
+        historySection.style.display = 'none';
+        toggleHistoryButton.textContent = 'History';
+    }
+}
+
+toggleHistoryButton.addEventListener('click', toggleHistory);
+
+// Hide history when clicking outside of it
+document.addEventListener('click', (event) => {
+    if (!historySection.contains(event.target) && !toggleHistoryButton.contains(event.target)) {
+        historySection.style.display = 'none';
+        toggleHistoryButton.textContent = 'History';
+    }
+});
+
+// Prevent hiding when clicking inside the history section
+historySection.addEventListener('click', (event) => {
+    event.stopPropagation();
+});
 
 // Function to set dynamic background based on location
 function setDynamicBackground(latitude, longitude) {
     const now = new Date();
     const hour = now.getHours();
-    const sunrise = 6; // Approximate sunrise hour
-    const sunset = 18; // Approximate sunset hour
+    let sunrise = 6;
+    let sunset = 18;
 
-    if (latitude < 0) { // Southern Hemisphere
+    if (latitude < 0) {
         sunrise += 1;
         sunset -= 1;
     }
@@ -113,7 +196,6 @@ function setDynamicBackground(latitude, longitude) {
     }
 }
 
-// Function to get location and set background
 function getLocationAndSetBackground() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
@@ -122,13 +204,12 @@ function getLocationAndSetBackground() {
             setDynamicBackground(latitude, longitude);
         }, function(error) {
             console.error('Geolocation error: ', error);
-            setDynamicBackground(0, 0); // Use default location (Equator)
+            setDynamicBackground(0, 0);
         });
     } else {
         console.error('Geolocation is not supported by this browser.');
-        setDynamicBackground(0, 0); // Use default location (Equator)
+        setDynamicBackground(0, 0);
     }
 }
 
-// Set the background when the page loads
 getLocationAndSetBackground();
