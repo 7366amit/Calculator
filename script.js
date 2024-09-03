@@ -1,11 +1,20 @@
-let display = document.getElementById('display');
+const display = document.getElementById('display');
 
+// Function to append text to the display
+function appendToDisplay(value) {
+    display.value += value;
+}
+
+// Functions for calculator operations
 function appendNumber(number) {
-    display.value += number;
+    appendToDisplay(number);
 }
 
 function appendOperator(operator) {
-    display.value += operator;
+    // Ensure operator isn't appended if last character is already an operator
+    const lastChar = display.value.slice(-1);
+    if (/[+\-*/]/.test(lastChar)) return;
+    appendToDisplay(operator);
 }
 
 function clearDisplay() {
@@ -53,14 +62,36 @@ function calculatePow() {
 function toRadians(degrees) {
     return degrees * (Math.PI / 180);
 }
+
+// Function to handle keyboard input
+function handleKeyboardInput(event) {
+    const key = event.key;
+
+    // Number keys and operators
+    if (/[0-9]/.test(key)) {
+        appendNumber(key);
+    } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+        appendOperator(key);
+    } else if (key === 'Enter') {
+        event.preventDefault(); // Prevent form submission
+        calculate();
+    } else if (key === 'Backspace') {
+        deleteLast();
+    } else if (key === 'Escape') {
+        clearDisplay();
+    }
+}
+
+// Add event listener for keyboard input
+document.addEventListener('keydown', handleKeyboardInput);
+
+// Function to set dynamic background based on location
 function setDynamicBackground(latitude, longitude) {
     const now = new Date();
     const hour = now.getHours();
     const sunrise = 6; // Approximate sunrise hour
     const sunset = 18; // Approximate sunset hour
 
-    // Adjust sunrise and sunset times based on location (simple approximation)
-    // You can refine this with more accurate solar calculations
     if (latitude < 0) { // Southern Hemisphere
         sunrise += 1;
         sunset -= 1;
@@ -69,20 +100,17 @@ function setDynamicBackground(latitude, longitude) {
     const body = document.body;
 
     if (hour >= sunrise && hour < 12) {
-        // Morning: from sunrise to noon
         body.style.background = 'linear-gradient(45deg, #FFD194, #70E1F5)';
     } else if (hour >= 12 && hour < sunset) {
-        // Afternoon: from noon to sunset
         body.style.background = 'linear-gradient(45deg, #FF7E5F, #FEB47B)';
     } else if (hour >= sunset && hour < 20) {
-        // Evening: from sunset to 9 PM
         body.style.background = 'linear-gradient(45deg, #6a82fb, #fc5c7d)';
     } else {
-        // Night: from 9 PM to sunrise
         body.style.background = 'linear-gradient(45deg, #2C3E50, #4CA1AF)';
     }
 }
 
+// Function to get location and set background
 function getLocationAndSetBackground() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
@@ -90,7 +118,6 @@ function getLocationAndSetBackground() {
             const longitude = position.coords.longitude;
             setDynamicBackground(latitude, longitude);
         }, function(error) {
-            // Fallback in case of error or user denies location access
             console.error('Geolocation error: ', error);
             setDynamicBackground(0, 0); // Use default location (Equator)
         });
