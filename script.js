@@ -75,6 +75,9 @@ function handleKeyboardInput(event) {
     } else if (key === 'Enter') {
         event.preventDefault(); // Prevent form submission
         calculate();
+    } else if (key === '=') {
+        event.preventDefault(); // Prevent form submission
+        calculate();
     } else if (key === 'Backspace') {
         deleteLast();
     } else if (key === 'Escape') {
